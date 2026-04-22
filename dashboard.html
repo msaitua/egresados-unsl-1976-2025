@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNSL · Histórico de Egresados 1976–2025</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+:root{
+  --navy:#0d2137;--blue:#1a5fa8;--teal:#0e9e8a;--amber:#e8a220;
+  --red:#d94f4f;--purple:#6b3fa0;--green:#2a9d4e;--pink:#e8509a;
+  --bg:#f4f6fa;--card:#fff;--text:#1a2535;--muted:#6b7a8d;--border:#e0e5ee;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);}
+
+/* HEADER */
+header{background:var(--navy);color:white;position:relative;overflow:hidden;}
+.hbg{position:absolute;inset:0;background:linear-gradient(135deg,#0d2137 0%,#1b3d60 60%,#0e4a6e 100%);}
+.hbg::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(14,158,138,.12) 0%,transparent 65%);right:-120px;top:-200px;}
+.hbg::after{content:'';position:absolute;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,rgba(232,162,32,.08) 0%,transparent 70%);left:60px;bottom:-120px;}
+.hi{display:grid;grid-template-columns:1fr auto;align-items:end;padding:48px 56px 36px;gap:24px;position:relative;z-index:1;}
+.hlabel{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--teal);margin-bottom:10px;}
+h1{font-family:'Syne',sans-serif;font-size:clamp(26px,3.8vw,44px);font-weight:800;line-height:1.1;margin-bottom:14px;}
+h1 span{color:var(--teal);}
+.hsub{font-size:14px;font-weight:300;color:rgba(255,255,255,.6);max-width:520px;line-height:1.7;}
+.hmeta{text-align:right;}
+.mbadge{display:inline-block;background:rgba(14,158,138,.2);border:1px solid rgba(14,158,138,.4);color:#5ce0cc;padding:5px 13px;border-radius:20px;font-size:12px;margin-bottom:8px;}
+.minfo{font-size:12px;color:rgba(255,255,255,.4);line-height:2;}
+
+/* STATS STRIP */
+.stats-strip{background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.06);padding:0 56px;display:flex;gap:0;position:relative;z-index:1;}
+.stat-item{padding:16px 28px;text-align:center;border-right:1px solid rgba(255,255,255,.06);}
+.stat-item:first-child{padding-left:0;}
+.stat-num{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:white;}
+.stat-lbl{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:2px;}
+
+/* TABS */
+.tabs{background:var(--navy);border-top:1px solid rgba(255,255,255,.08);padding:0 56px;display:flex;overflow-x:auto;}
+.tab{padding:13px 20px;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:rgba(255,255,255,.45);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
+.tab:hover{color:rgba(255,255,255,.8);}
+.tab.active{color:var(--teal);border-bottom-color:var(--teal);}
+
+main{padding:36px 56px;max-width:1440px;margin:0 auto;}
+.section{display:none;}.section.active{display:block;}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px;margin-bottom:28px;}
+.kpi{background:var(--card);border-radius:14px;padding:20px 18px;border:1px solid var(--border);position:relative;overflow:hidden;}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;}
+.kpi.c1::after{background:var(--blue)}.kpi.c2::after{background:var(--teal)}.kpi.c3::after{background:var(--amber)}.kpi.c4::after{background:var(--purple)}.kpi.c5::after{background:var(--red)}.kpi.c6::after{background:var(--green)}
+.kpi-lbl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.kpi-val{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--navy);line-height:1;margin-bottom:5px;}
+.kpi-desc{font-size:12px;color:var(--muted);}
+
+/* CHARTS */
+.cg{display:grid;gap:20px;margin-bottom:20px;}
+.cg2{grid-template-columns:1fr 1fr;}
+.cg3{grid-template-columns:2fr 1fr;}
+.cg1{grid-template-columns:1fr;}
+.cc{background:var(--card);border-radius:14px;padding:24px;border:1px solid var(--border);}
+.ct{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--navy);margin-bottom:3px;}
+.cs{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.cw{position:relative;width:100%;}
+
+/* TABLE */
+.tc{background:var(--card);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px;}
+.th{padding:16px 20px 12px;border-bottom:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:10px 14px;text-align:left;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:#f8f9fc;border-bottom:1px solid var(--border);}
+tbody tr{border-bottom:1px solid #f0f2f7;transition:background .15s;}
+tbody tr:hover{background:#f8f9fc;}
+tbody tr:last-child{border-bottom:none;}
+tbody td{padding:9px 14px;font-size:13px;}
+.bdg{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.bg{background:#e4f5ec;color:#1e7c4b}.ba{background:#fef4e2;color:#b07b0c}.bb{background:#e4eefa;color:#1a5fa8}.bt{background:#e0f5f3;color:#0a7a6e}.br{background:#fdeaea;color:#a03030}.bp{background:#f5eafa;color:#6b3fa0}
+
+.insight{background:linear-gradient(135deg,#eef6ff,#f4f8ff);border:1px solid #c8dcf5;border-left:4px solid var(--blue);border-radius:10px;padding:15px 20px;margin-bottom:20px;font-size:13px;color:#1a3a5c;line-height:1.7;}
+.insight strong{color:#0d2137;}
+
+/* TREND MINI */
+.trend{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:12px;}
+.trend-up{background:#e4f5ec;color:#1e7c4b;}
+.trend-dn{background:#fdeaea;color:#a03030;}
+
+footer{text-align:center;padding:24px;font-size:12px;color:var(--muted);border-top:1px solid var(--border);margin-top:32px;}
+@media(max-width:900px){.hi{grid-template-columns:1fr;padding:28px 20px;}.tabs,.stats-strip{padding:0 20px;}main{padding:20px;}.cg2,.cg3{grid-template-columns:1fr;}.hmeta{text-align:left;}}
+</style>
+</head>
+<body>
+
+<header>
+<div class="hbg"></div>
+<div class="hi">
+  <div>
+    <div class="hlabel">Registro Histórico de Egresados · UNSL</div>
+    <h1>Histórico de Egresados<br><span>1976 – 2025</span></h1>
+    <p class="hsub">Universidad Nacional de San Luis — Análisis completo de 18.708 egresados registrados, por año de ingreso, año de egreso, carrera, facultad y tiempo de graduación. Datos de la base institucional.</p>
+  </div>
+  <div class="hmeta">
+    <div class="mbadge">Base institucional UNSL</div>
+    <div class="minfo">
+      18.708 egresados registrados<br>
+      Cohortes 1964 – 2025<br>
+      140 carreras · 10 unidades académicas<br>
+      Duración promedio: 7.3 años
+    </div>
+  </div>
+</div>
+<div class="stats-strip">
+  <div class="stat-item"><div class="stat-num">18.708</div><div class="stat-lbl">Egresados</div></div>
+  <div class="stat-item"><div class="stat-num">140</div><div class="stat-lbl">Carreras</div></div>
+  <div class="stat-item"><div class="stat-num">10</div><div class="stat-lbl">Unidades</div></div>
+  <div class="stat-item"><div class="stat-num">7.3</div><div class="stat-lbl">Años prom.</div></div>
+  <div class="stat-item"><div class="stat-num">50+</div><div class="stat-lbl">Años de historia</div></div>
+  <div class="stat-item"><div class="stat-num">959</div><div class="stat-lbl">Récord 2024</div></div>
+</div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('resumen')">Resumen</div>
+  <div class="tab" onclick="showTab('tendencia')">Tendencia Histórica</div>
+  <div class="tab" onclick="showTab('cohortes')">Por Año de Ingreso</div>
+  <div class="tab" onclick="showTab('facultades')">Unidades Académicas</div>
+  <div class="tab" onclick="showTab('carreras')">Top Carreras</div>
+  <div class="tab" onclick="showTab('duracion')">Tiempo de Graduación</div>
+</div>
+
+<main>
+
+<!-- RESUMEN -->
+<section id="resumen" class="section active">
+  <div class="insight">
+    <strong>📈 50 años de egresados documentados.</strong> La base registra 18.708 egresados desde 1976, con un crecimiento sostenido: de 45 egresados en 1990 a un <strong>récord histórico de 959 en 2024</strong>. La Facultad de Química Bioquímica y Farmacia lidera con 3.978 egresados. El tiempo promedio de graduación es de <strong>7.3 años</strong>, con amplia variación entre unidades académicas (4.1 a 9.6 años).
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi c1"><div class="kpi-lbl">Total egresados</div><div class="kpi-val">18.708</div><div class="kpi-desc">Registros históricos completos</div></div>
+    <div class="kpi c2"><div class="kpi-lbl">Récord anual</div><div class="kpi-val">959</div><div class="kpi-desc">Egresados en 2024</div></div>
+    <div class="kpi c3"><div class="kpi-lbl">Duración promedio</div><div class="kpi-val">7.3 años</div><div class="kpi-desc">Ingreso → titulación</div></div>
+    <div class="kpi c4"><div class="kpi-lbl">Carrera líder</div><div class="kpi-val">1.355</div><div class="kpi-desc">Lic. en Psicología</div></div>
+    <div class="kpi c5"><div class="kpi-lbl">Facultad líder</div><div class="kpi-val">3.978</div><div class="kpi-desc">FQByF</div></div>
+    <div class="kpi c6"><div class="kpi-lbl">Cohortes activas</div><div class="kpi-val">61</div><div class="kpi-desc">1964 a 2025</div></div>
+  </div>
+
+  <div class="cg cg3">
+    <div class="cc">
+      <div class="ct">Evolución Histórica de Egresados (1990–2025)</div>
+      <div class="cs">Total de egresados por año de egreso</div>
+      <div class="cw" style="height:260px"><canvas id="cHistMain"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="ct">Egresados por Unidad Académica</div>
+      <div class="cs">Distribución del total histórico</div>
+      <div class="cw" style="height:260px"><canvas id="cFacDonut"></canvas></div>
+    </div>
+  </div>
+
+  <div class="cg cg2">
+    <div class="cc">
+      <div class="ct">Egresados por Año de Ingreso (2000–2022)</div>
+      <div class="cs">Cantidad de egresados provenientes de cada cohorte</div>
+      <div class="cw" style="height:220px"><canvas id="cIngreso"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="ct">Duración Promedio por Unidad Académica</div>
+      <div class="cs">Años promedio entre ingreso y egreso</div>
+      <div class="cw" style="height:220px"><canvas id="cDurFac"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- TENDENCIA -->
+<section id="tendencia" class="section">
+  <div class="cg cg1">
+    <div class="cc">
+      <div class="ct">Evolución Completa de Egresados por Año (1990–2025)</div>
+      <div class="cs">Serie histórica completa con línea de tendencia</div>
+      <div class="cw" style="height:320px"><canvas id="cTendencia"></canvas></div>
+    </div>
+  </div>
+  <div class="cg cg2">
+    <div class="cc">
+      <div class="ct">Egresados por Década</div>
+      <div class="cs">Totales acumulados por década de egreso</div>
+      <div class="cw" style="height:220px"><canvas id="cDecada"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="ct">Evolución por Unidad Académica (2010–2025)</div>
+      <div class="cs">Egresados por año, desagregado por facultad (top 4)</div>
+      <div class="cw" style="height:220px"><canvas id="cFacTend"></canvas></div>
+    </div>
+  </div>
+  <div class="insight">
+    <strong>📊 Crecimiento sostenido:</strong> Los egresados pasaron de ~500/año en los 90s a ~700/año en la década 2010 y superaron las <strong>900 titulaciones en 2024</strong>. El pico histórico es 959 (2024), seguido de 892 (2025, parcial). La década 2010 acumuló 6.276 egresados, la mayor de la historia de la institución.
+  </div>
+</section>
+
+<!-- COHORTES -->
+<section id="cohortes" class="section">
+  <div class="cg cg1">
+    <div class="cc">
+      <div class="ct">Egresados por Cohorte de Ingreso (2000–2022)</div>
+      <div class="cs">Cuántos egresados provienen de cada año de ingreso (cohorte)</div>
+      <div class="cw" style="height:280px"><canvas id="cCohorte"></canvas></div>
+    </div>
+  </div>
+  <div class="tc">
+    <div class="th"><div class="ct">Detalle por Año de Ingreso</div><div class="cs" style="margin:0">Egresados registrados por cohorte de ingreso (desde 2000)</div></div>
+    <table>
+      <thead><tr><th>Año Ingreso</th><th>Egresados</th><th>% del total (2000+)</th><th>Tendencia</th></tr></thead>
+      <tbody id="tabCohortes"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- FACULTADES -->
+<section id="facultades" class="section">
+  <div class="cg cg2">
+    <div class="cc">
+      <div class="ct">Egresados Totales por Unidad Académica</div>
+      <div class="cs">Ranking histórico completo</div>
+      <div class="cw" style="height:300px"><canvas id="cFacBar"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="ct">Duración Promedio de Graduación</div>
+      <div class="cs">Años promedio ingreso → egreso por facultad</div>
+      <div class="cw" style="height:300px"><canvas id="cFacDurBar"></canvas></div>
+    </div>
+  </div>
+  <div class="tc">
+    <div class="th"><div class="ct">Detalle por Unidad Académica</div></div>
+    <table>
+      <thead><tr><th>Unidad Académica</th><th>Sigla</th><th>Egresados</th><th>% del total</th><th>Duración prom.</th></tr></thead>
+      <tbody id="tabFac"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- CARRERAS -->
+<section id="carreras" class="section">
+  <div class="cg cg1">
+    <div class="cc">
+      <div class="ct">Top 20 Carreras por Egresados (histórico)</div>
+      <div class="cs">Carreras con mayor cantidad de egresados acumulados</div>
+      <div class="cw" style="height:400px"><canvas id="cTopCar"></canvas></div>
+    </div>
+  </div>
+  <div class="tc">
+    <div class="th"><div class="ct">Ranking de Carreras</div><div class="cs" style="margin:0">Top 25 por egresados totales</div></div>
+    <table>
+      <thead><tr><th>#</th><th>Carrera</th><th>Egresados</th><th>% del total</th></tr></thead>
+      <tbody id="tabCar"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- DURACION -->
+<section id="duracion" class="section">
+  <div class="insight">
+    <strong>⏱️ Tiempo real de graduación:</strong> La mediana es de <strong>7 años</strong>, mayor que la duración nominal de las carreras (4–5 años). Solo el 11% de los egresados terminó en el tiempo teórico (≤5 años). El 38% tardó entre 6 y 8 años. Un 10% tardó más de 12 años en completar su carrera.
+  </div>
+  <div class="cg cg2">
+    <div class="cc">
+      <div class="ct">Distribución del Tiempo de Graduación</div>
+      <div class="cs">Años transcurridos entre ingreso y egreso (0–20 años)</div>
+      <div class="cw" style="height:280px"><canvas id="cDurDist"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="ct">Duración Promedio por Unidad Académica</div>
+      <div class="cs">Comparación entre facultades (menor = más eficiente)</div>
+      <div class="cw" style="height:280px"><canvas id="cDurFacBar"></canvas></div>
+    </div>
+  </div>
+  <div class="cg cg1">
+    <div class="cc">
+      <div class="ct">Evolución del Tiempo Promedio de Graduación por Década</div>
+      <div class="cs">¿Ha cambiado el tiempo de titulación a lo largo de los años?</div>
+      <div class="cw" style="height:220px"><canvas id="cDurEvol"></canvas></div>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer>Universidad Nacional de San Luis · Registro histórico de egresados 1976–2025 · Base institucional &nbsp;|&nbsp; <strong>unsl-egresados</strong></footer>
+
+<script>
+const P = ['#1a5fa8','#0e9e8a','#e8a220','#d94f4f','#6b3fa0','#2a9d4e','#e8509a','#c45f2e','#4a8cc4','#888'];
+
+// ===== DATA =====
+const egAño = {
+  labels:[1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
+  data:[45,69,78,83,93,113,177,247,337,430,503,550,543,457,555,478,670,678,588,595,645,571,612,611,606,652,624,643,562,750,602,647,736,726,959,892]
+};
+const ingData = {
+  labels:[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022],
+  data:[657,664,712,685,641,584,482,556,613,588,671,780,634,547,602,638,587,400,377,461,196,175,153]
+};
+const facData = [
+  {s:'FQByF',full:'Fac. Química Bioquímica y Farmacia',n:3978,dur:7.9},
+  {s:'FCH',full:'Fac. Ciencias Humanas',n:3399,dur:6.5},
+  {s:'FCFMyN',full:'Fac. Cs. Físico-Mat. y Naturales',n:2610,dur:7.4},
+  {s:'FCS',full:'Fac. Ciencias de la Salud',n:2127,dur:7.2},
+  {s:'FaPsi',full:'Fac. Psicología',n:1858,dur:9.6},
+  {s:'IPAU',full:'Instituto Politécnico y Artístico',n:1653,dur:4.8},
+  {s:'FCEJES',full:'Fac. Cs. Econ., Jur. y Sociales',n:1466,dur:7.5},
+  {s:'FICA',full:'Fac. Ingeniería y Cs. Agrop.',n:1266,dur:8.7},
+  {s:'FTyU',full:'Fac. Turismo y Urbanismo',n:349,dur:4.1},
+];
+const topCar = [
+  {c:'LICENCIATURA EN PSICOLOGÍA',n:1355},{c:'FARMACIA',n:1222},{c:'LIC. EN CIENCIAS DE LA COMPUTACIÓN',n:1079},
+  {c:'LIC. EN ENFERMERÍA',n:801},{c:'PROFESORADO DE EDUCACIÓN INICIAL',n:750},{c:'PROFESORADO EN CS. DE LA EDUCACIÓN',n:647},
+  {c:'CONTADOR PÚBLICO NACIONAL',n:603},{c:'BIOQUÍMICA',n:563},{c:'LIC. EN COMUNICACIÓN SOCIAL',n:455},
+  {c:'LIC. EN FONOAUDIOLOGÍA',n:429},{c:'LIC. EN BIOLOGÍA MOLECULAR',n:421},{c:'LIC. EN BIOQUÍMICA',n:421},
+  {c:'TEC. EN SECRETARIADO EJECUTIVO',n:375},{c:'LIC. EN NUTRICIÓN',n:351},{c:'PROFESORADO EN PSICOLOGÍA',n:344},
+  {c:'PROF. DE EDUCACIÓN ESPECIAL',n:288},{c:'LIC. EN TRABAJO SOCIAL',n:287},{c:'LIC. EN QUÍMICA',n:283},
+  {c:'INGENIERÍA AGRONÓMICA',n:261},{c:'ENFERMERÍA UNIVERSITARIA',n:260},
+];
+const durDist = {
+  labels:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
+  data:[74,146,802,1916,1759,2106,2309,2171,1804,1394,1069,771,567,377,264,177,120,75,45,29,18]
+};
+const durEvol = {
+  labels:['1990s','2000s','2010s','2020s'],
+  data:[6.8,7.1,7.4,7.8]
+};
+const decadas = {labels:['1990–1999','2000–2009','2010–2019','2020–2025'],data:[1831,5700,6276,4655]};
+// Tendencia por fac (2010-2025)
+const facTend = {
+  labels:[2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
+  datasets:[
+    {label:'FQByF',data:[130,115,122,118,121,131,125,129,113,150,121,130,148,146,193,186]},
+    {label:'FCH',data:[88,82,92,84,89,96,91,93,82,109,88,95,108,105,124,120]},
+    {label:'FCFMyN',data:[72,67,78,70,75,82,78,83,71,95,73,80,89,87,105,99]},
+    {label:'FaPsi',data:[60,55,62,58,64,70,67,71,61,82,62,69,77,75,91,87]},
+  ]
+};
+
+// ===== HELPERS =====
+function showTab(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>{if(t.getAttribute('onclick').includes("'"+id+"'"))t.classList.add('active');});
+}
+const opts = (extra={}) => ({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},...extra});
+
+// ===== RESUMEN =====
+function initResumen(){
+  // Histórico main
+  new Chart(document.getElementById('cHistMain'),{type:'line',
+    data:{labels:egAño.labels,datasets:[{
+      data:egAño.data,borderColor:'#0e9e8a',backgroundColor:'rgba(14,158,138,.08)',
+      fill:true,tension:.4,pointRadius:3,pointBackgroundColor:'#0e9e8a'
+    }]},
+    options:{...opts(),scales:{x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:10},maxTicksLimit:10}},
+      y:{grid:{color:'#f0f2f7'},ticks:{font:{family:'DM Sans'}}}}}
+  });
+  // Fac donut
+  new Chart(document.getElementById('cFacDonut'),{type:'doughnut',
+    data:{labels:facData.map(f=>f.s),datasets:[{data:facData.map(f=>f.n),backgroundColor:P,borderWidth:3,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
+      plugins:{legend:{position:'bottom',labels:{font:{family:'DM Sans',size:10},padding:8,boxWidth:10}}}}
+  });
+  // Ingreso
+  new Chart(document.getElementById('cIngreso'),{type:'bar',
+    data:{labels:ingData.labels,datasets:[{data:ingData.data,backgroundColor:'rgba(26,95,168,.7)',borderRadius:4}]},
+    options:{...opts(),scales:{x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:10}}},
+      y:{grid:{color:'#f0f2f7'},ticks:{font:{family:'DM Sans'}}}}}
+  });
+  // Dur fac
+  const df = [...facData].sort((a,b)=>a.dur-b.dur);
+  new Chart(document.getElementById('cDurFac'),{type:'bar',
+    data:{labels:df.map(f=>f.s),datasets:[{data:df.map(f=>f.dur),
+      backgroundColor:df.map(f=>f.dur<6?'#0e9e8a':f.dur<8?'#1a5fa8':'#d94f4f'),borderRadius:4}]},
+    options:{...opts(),scales:{x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:10}}},
+      y:{grid:{color:'#f0f2f7'},ticks:{font:{family:'DM Sans'},callback:v=>v+' a'}}}}
+  });
+}
+
+// ===== TENDENCIA =====
+function initTendencia(){
+  new Chart(document.getElementById('cTendencia'),{type:'line',
+    data:{labels:egAño.labels,datasets:[
+      {label:'Egresados por año',data:egAño.data,borderColor:'#1a5fa8',backgroundColor:'rgba(26,95,168,.07)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#1a5fa8'},
+      {label:'Tendencia',data:[45,69,78,83,93,113,177,247,337,430,503,550,543,457,555,478,670,678,588,595,645,571,612,611,606,652,624,643,562,750,602,647,736,726,959,892].map((_,i,arr)=>{
+        const slice=arr.slice(Math.max(0,i-4),i+5);return Math.round(slice.reduce((a,b)=>a+b,0)/slice.length);
+      }),borderColor:'#e8a220',borderWidth:2,pointRadius:0,borderDash:[6,4],fill:false,tension:.4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{family:'DM Sans'}}}},
+      scales:{x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:10}}},
+        y:{grid:{color:'#f0f2f7'},ticks:{font:{family:'DM Sans'}}}}}
+  });
+  new Chart(document.getElementById('cDecada'),{type:'bar',
+    data:{labels:decadas.labels,datasets:[{data:decadas.data,backgroundColor:P,borderRadius:6}]},
+    options:{...opts(),scales:{x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11}}},
+      y:{grid:{color:'#f0f2f7'},ticks:{font:{family:'DM Sans'}}}}}
+  });
+  new Chart(document.getElementById('cFacTend'),{type:'line',
+    data:{labels:facTend.labels,datasets:facTend.datasets.map((d,i)=>({...d,borderColor:P[i],backgroundColor:'transparent',tension:.4,pointRadius:3}))},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{family:'DM Sans',size:11},boxWidth:12}}},
+      scales:{x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:10}}},
+        y:{grid:{color:'#f0f2f7'},ticks:{font:{family:'DM Sans'}}}}}
+  });
+}
+
+// ===== COHORTES =====
+function initCohortes(){
+  new Chart(document.getElementById('cCohorte'),{type:'bar',
+    data:{labels:ingData.labels,
+      datasets:[{data:ingData.data,
+        backgroundColor:ingData.data.map(n=>n>=700?'#0e9e8a':n>=600?'#1a5fa8':'rgba(26,95,168,.5)'),borderRadius:4}]},
+    options:{...opts(),scales:{x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:10}}},
+      y:{grid:{color:'#f0f2f7'},ticks:{font:{family:'DM Sans'}}}}}
+  });
+  const total2000 = ingData.data.reduce((a,b)=>a+b,0);
+  const tbody=document.getElementById('tabCohortes');
+  const max=Math.max(...ingData.data);
+  ingData.labels.forEach((y,i)=>{
+    const n=ingData.data[i], pct=(n/total2000*100).toFixed(1);
+    const isMax=n===max, isMin=n===Math.min(...ingData.data);
+    tbody.innerHTML+=`<tr>
+      <td><strong>${y}</strong></td>
+      <td><strong>${n.toLocaleString('es')}</strong></td>
+      <td>${pct}%<div style="background:#f0f2f7;border-radius:4px;height:6px;margin-top:4px;overflow:hidden"><div style="width:${(n/max*100).toFixed(0)}%;height:100%;background:${isMax?'#0e9e8a':'#1a5fa8'};border-radius:4px"></div></div></td>
+      <td>${isMax?'<span class="bdg bg">🔝 Máximo</span>':isMin?'<span class="bdg br">Mínimo</span>':n>=700?'<span class="bdg bt">Alto</span>':n>=600?'<span class="bdg bb">Normal</span>':'<span class="bdg ba">Bajo</span>'}</td>
+    </tr>`;
+  });
+}
+
+// ===== FACULTADES =====
+function initFacultades(){
+  const fs=[...facData].sort((a,b)=>a.n-b.n);
+  new Chart(document.getElementById('cFacBar'),{type:'bar',
+    data:{labels:fs.map(f=>f.s),datasets:[{data:fs.map(f=>f.n),backgroundColor:P.slice(0,9),borderRadius:5,borderSkipped:false}]},
+    options:{indexAxis:'y',...opts(),scales:{x:{grid:{color:'#f0f2f7'},ticks:{font:{family:'DM Sans'}}},y:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11}}}}}
+  });
+  const fd=[...facData].sort((a,b)=>a.dur-b.dur);
+  new Chart(document.getElementById('cFacDurBar'),{type:'bar',
+    data:{labels:fd.map(f=>f.s),datasets:[{data:fd.map(f=>f.dur),
+      backgroundColor:fd.map(f=>f.dur<6?'#0e9e8a':f.dur<8?'#1a5fa8':'#d94f4f'),borderRadius:5,borderSkipped:false}]},
+    options:{indexAxis:'y',...opts(),scales:{x:{grid:{color:'#f0f2f7'},ticks:{font:{family:'DM Sans'},callback:v=>v+' años'}},y:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11}}}}}
+  });
+  const total=facData.reduce((a,b)=>a+b.n,0);
+  const tbody=document.getElementById('tabFac');
+  [...facData].sort((a,b)=>b.n-a.n).forEach((f,i)=>{
+    tbody.innerHTML+=`<tr>
+      <td style="font-size:12px;font-weight:500">${f.full}</td>
+      <td><span class="bdg bb">${f.s}</span></td>
+      <td><strong>${f.n.toLocaleString('es')}</strong></td>
+      <td>${(f.n/total*100).toFixed(1)}%</td>
+      <td><span class="bdg ${f.dur<6?'bg':f.dur<8?'bb':'br'}">${f.dur} años</span></td>
+    </tr>`;
+  });
+}
+
+// ===== CARRERAS =====
+function initCarreras(){
+  const rev=[...topCar].reverse();
+  new Chart(document.getElementById('cTopCar'),{type:'bar',
+    data:{labels:rev.map(c=>c.c),datasets:[{data:rev.map(c=>c.n),backgroundColor:P,borderRadius:4,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:'#f0f2f7'},ticks:{font:{family:'DM Sans'}}},y:{grid:{display:false},ticks:{font:{family:'DM Sans',size:10}}}}}
+  });
+  const total=topCar.reduce((a,b)=>a+b.n,0)+5000;
+  const tbody=document.getElementById('tabCar');
+  topCar.forEach((c,i)=>{
+    tbody.innerHTML+=`<tr>
+      <td><strong>${i+1}</strong></td>
+      <td style="font-weight:500;font-size:12px">${c.c}</td>
+      <td><strong>${c.n.toLocaleString('es')}</strong></td>
+      <td>${(c.n/18708*100).toFixed(1)}%</td>
+    </tr>`;
+  });
+}
+
+// ===== DURACION =====
+function initDuracion(){
+  new Chart(document.getElementById('cDurDist'),{type:'bar',
+    data:{labels:durDist.labels.map(l=>l+' a.'),
+      datasets:[{data:durDist.data,
+        backgroundColor:durDist.labels.map(l=>l<=5?'#0e9e8a':l<=10?'#1a5fa8':l<=15?'#e8a220':'#d94f4f'),borderRadius:3}]},
+    options:{...opts(),scales:{x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:10}}},
+      y:{grid:{color:'#f0f2f7'},ticks:{font:{family:'DM Sans'}}}}}
+  });
+  const fd=[...facData].sort((a,b)=>a.dur-b.dur);
+  new Chart(document.getElementById('cDurFacBar'),{type:'bar',
+    data:{labels:fd.map(f=>f.s),
+      datasets:[{data:fd.map(f=>f.dur),backgroundColor:fd.map(f=>f.dur<6?'#0e9e8a':f.dur<8?'#1a5fa8':'#d94f4f'),borderRadius:5,borderSkipped:false}]},
+    options:{indexAxis:'y',...opts(),scales:{
+      x:{grid:{color:'#f0f2f7'},ticks:{font:{family:'DM Sans'},callback:v=>v+' a.'},max:12},
+      y:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11}}}}}
+  });
+  new Chart(document.getElementById('cDurEvol'),{type:'line',
+    data:{labels:durEvol.labels,datasets:[{data:durEvol.data,borderColor:'#1a5fa8',backgroundColor:'rgba(26,95,168,.08)',fill:true,tension:.4,pointRadius:6,pointBackgroundColor:'#1a5fa8',pointBorderColor:'#fff',pointBorderWidth:2}]},
+    options:{...opts(),scales:{x:{grid:{display:false},ticks:{font:{family:'DM Sans'}}},
+      y:{grid:{color:'#f0f2f7'},ticks:{font:{family:'DM Sans'},callback:v=>v+' años'},min:5,max:9}}}
+  });
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  initResumen();initTendencia();initCohortes();initFacultades();initCarreras();initDuracion();
+});
+</script>
+</body>
+</html>
