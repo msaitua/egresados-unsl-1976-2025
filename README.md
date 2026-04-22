@@ -117,36 +117,4 @@ unsl-egresados-xlsx/
 
 ---
 
-## 🚀 Cómo Usar
-
-```bash
-git clone https://github.com/msaitua/unsl-egresados-xlsx.git
-cd unsl-egresados-xlsx
-open visualizaciones/dashboard.html
-```
-
-```python
-import pandas as pd
-df = pd.read_csv('data/egresados_limpio.csv')
-df['duracion'] = df['anio_egreso'] - df['anio_ingreso']
-
-# Egresados por año
-df.groupby('anio_egreso').size().plot()
-
-# Duración promedio por facultad
-df[df['duracion']>=0].groupby('facultad')['duracion'].mean().sort_values()
-```
-
----
-
-## 🔄 Comparación de Fuentes Disponibles
-
-| Fuente | Tipo | Egresados | Período | Datos disponibles |
-|--------|------|-----------|---------|-------------------|
-| `Egresados_UNSL.xlsx` | Base institucional | 18.708 | 1976–2025 | ✅ Individuales |
-| `54-2024-NOM-cuadros3y11.txt` | SIU estadístico | 152 | 2012–2024 | ✅ Agrupados por cohorte |
-| `54-2025-NOM-cuadros3y11.txt` | SIU estadístico | — | 2013–2025 | ❌ Protegidos |
-
----
-
 *Generado con Python · pandas · Abril 2025*
